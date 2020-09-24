@@ -7,6 +7,23 @@ body {
     font-family: Tahoma, Arial;
 }
 
+/* This is an A11y Change*/
+#skip a {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* This is an A11y Change*/
+#skip a:focus{
+    position: static;
+    width: auto;
+    height: auto;
+}
+
 div.menu {
     width: 100%;
     background-color: #4d5791;
