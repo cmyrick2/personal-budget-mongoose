@@ -5,48 +5,59 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = 3000;
-
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const pbModel = require('./models/pb_schema.js');
+let url = 'mongodb://localhost:27017/personal_budget_db';
 
 app.use(cors());
-
-const fs = require('fs');
-
-
-//app.use('/', express.static('public'));
-
-// const budget = {
-//     myBudget: [
-//     {
-//         title: 'Eat out',
-//         budget: 25
-//     },
-//     {
-//         title: 'Rent',
-//         budget: 375
-//     },
-//     {
-//         title: 'Grocery',
-//         budget: 110
-//     },
-//   ]
-// };
-
-const budget = JSON.parse(fs.readFileSync('budget-data.json', 'utf8'));
-
-//app.get('/hello', (req, res) => {
-//    res.send('Hello World!');
-//});
-
-//assign JSON file location to const variable
-//const budget = require('budget-data.json')
-// app.get('/budget', (req, res) => {
-//     res.sendFile(budget);
-// });
+app.use(express.json());
+app.use('/', express.static('public'));
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 
 
 
 app.get('/budget', (req, res) => {
-    res.json(budget);
+    mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true})
+        .then(() => {
+            pbModel.find({})
+                .then((data) => {
+                    console.log("Connected to the database")
+                    //console.log(data);
+                    res.json(data);
+                    mongoose.connection.close();
+                })
+                .catch((connectionError) => {
+                    console.log(connectionError);
+                });
+        })
+        .catch((connectionError) => {
+            console.log(connectionError);
+        });
+});
+
+app.post('/addEntry', (req, res) => {
+    console.log(req.body);
+    mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true})
+    .then(() => {
+        newEntry = {
+            title: req.body.title,
+            budget: req.body.budget,
+            color: req.body.color
+        }
+        pbModel.insertMany(newEntry)
+            .then((data) => {
+                res.json(data);
+                mongoose.connection.close();
+            })
+            .catch((connectionError) => {
+                console.log(connectionError)
+            });
+    })
+    .catch((connectionError) => {
+        console.log(connectionError)
+    });
 });
 
 app.listen(port, () => {
